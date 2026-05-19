@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Tasks | FitProof</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <button class="mobile-menu" onclick="document.querySelector('.sidebar').classList.toggle('show')">☰ Menu</button>
+
+  <aside class="sidebar">
+    <h2>FitProof</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="submit-task.html">Submit Daily Task</a>
+    <a class="active" href="verify-task.html">Verify Tasks</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="profile.html">Profile</a>
+    <a href="rules.html">Rules</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Verify Member Tasks</h1>
+        <p>Approve genuine workout submissions and earn verification points.</p>
+      </div>
+    </div>
+
+    <div id="pageMessage"></div>
+
+    <div id="taskList" class="grid grid-2"></div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+
+<script>
+protectPage();
+
+const taskList = document.getElementById("taskList");
+const pageMessage = document.getElementById("pageMessage");
+
+function showMessage(message, type = "success") {
+  pageMessage.innerHTML = `
+    <div class="card" style="
+      margin-bottom:18px;
+      border-left:5px solid ${type === "success" ? "#16a34a" : "#dc2626"};
+      background:${type === "success" ? "#ecfdf5" : "#fef2f2"};
+      color:${type === "success" ? "#166534" : "#991b1b"};
+      font-weight:600;
+    ">
+      ${message}
+    </div>
+  `;
+}
+
+function setAllButtonsLoading(activeButton, loading, text) {
+  const buttons = document.querySelectorAll("button");
+
+  buttons.forEach(btn => {
+    btn.disabled = loading;
+    btn.style.opacity = loading ? "0.6" : "1";
+    btn.style.cursor = loading ? "not-allowed" : "pointer";
+  });
+
+  if (activeButton) {
+    activeButton.textContent = loading ? "Processing..." : text;
+  }
+}
+
+async function loadPendingTasks() {
+  const user = getUser();
+
+  if (!user) {
+    window.location.replace("./index.html");
+    return;
+  }
+
+  taskList.innerHTML = `<div class="card">Loading pending tasks...</div>`;
+
+  const data = await apiRequest({
+    action: "getPendingTasks",
+    member_id: user.member_id
+  });
+
+  taskList.innerHTML = "";
+
+  if (!data.tasks || data.tasks.length === 0) {
+    taskList.innerHTML = `<div class="card">No pending tasks available.</div>`;
+    return;
+  }
+
+  data.tasks.forEach(task => {
+    taskList.innerHTML += `
+      <div class="card">
+        <h3>${task.member_name}</h3>
+        <p><b>Date:</b> ${task.task_date}</p>
+        <p><b>Workout:</b> ${task.workout_type}</p>
+        <p><b>Category:</b> ${task.exercise_category}</p>
+        <p><b>Duration:</b> ${task.duration_minutes} min</p>
+        <p><b>Note:</b> ${task.note || "No note"}</p>
+
+        ${task.proof_url ? `<p><a href="${task.proof_url}" target="_blank">View Proof</a></p>` : ""}
+
+        <br>
+
+        <button 
+          class="btn-success"
+          data-original-text="Approve"
+          onclick="verifyTask('${task.task_id}', 'Approved', this)">
+          Approve
+        </button>
+
+        <button 
+          class="btn-danger"
+          data-original-text="Reject"
+          onclick="verifyTask('${task.task_id}', 'Rejected', this)">
+          Reject
+        </button>
+      </div>
+    `;
+  });
+}
+
+async function verifyTask(taskId, decision, button) {
+  const originalText = button ? button.dataset.originalText : decision;
+
+  const comment = prompt("Add comment optional:") || "";
+  const user = getUser();
+
+  if (!user) {
+    window.location.replace("./index.html");
+    return;
+  }
+
+  setAllButtonsLoading(button, true, originalText);
+  pageMessage.innerHTML = "";
+
+  try {
+    const data = await apiRequest({
+      action: "verifyTask",
+      task_id: taskId,
+      verified_by_id: user.member_id,
+      verified_by_name: user.name,
+      decision,
+      comment
+    });
+
+    if (data.status === "success") {
+      showMessage(data.message || "Verification submitted successfully", "success");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+
+    } else {
+      showMessage(data.message || "Verification failed", "error");
+      setAllButtonsLoading(button, false, originalText);
+    }
+
+  } catch (err) {
+    console.error("VERIFY ERROR:", err);
+    showMessage("Something went wrong. Please try again.", "error");
+    setAllButtonsLoading(button, false, originalText);
+  }
+}
+
+loadPendingTasks();
+</script>
+
+</body>
+</html>

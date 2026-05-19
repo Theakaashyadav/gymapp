@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | FitProof</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <button class="mobile-menu" onclick="document.querySelector('.sidebar').classList.toggle('show')">☰ Menu</button>
+
+  <aside class="sidebar">
+    <h2>FitProof</h2>
+    <a class="active" href="dashboard.html">Dashboard</a>
+    <a href="submit-task.html">Submit Daily Task</a>
+    <a href="verify-task.html">Verify Tasks</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="profile.html">Profile</a>
+    <a href="rules.html">Rules</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1>Hello, <span data-user-name></span></h1>
+        <p>Protect your streak, earn points, and stay away from the Comeback Board 😂</p>
+      </div>
+      <a href="submit-task.html" class="btn" onclick="showLinkProcessing(this)">Submit Today</a>
+    </div>
+
+    <div class="grid grid-4">
+      <div class="card stat-card">
+        <h3 id="validDays">0</h3>
+        <p>Valid Gym Days</p>
+      </div>
+
+      <div class="card stat-card streak-card">
+        <h3 id="streak">0</h3>
+        <p>Current Streak 🔥</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="points">0</h3>
+        <p>Total Points</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="rank">--</h3>
+        <p>Monthly Rank</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">🔥 Streak Focus</h2>
+
+    <div class="grid grid-2">
+
+      <div class="card highlight-card" id="lowestStreakCard">
+        <h3>Loading...</h3>
+        <p>Checking lowest streak member...</p>
+      </div>
+
+      <div class="card">
+        <h3>😂 Friendly Tease</h3>
+        <p style="margin:10px 0;color:var(--muted);">
+          Send a fun reminder to the lowest streak member. Keep it friendly.
+        </p>
+
+        <div class="form-group">
+          <label>Select Message</label>
+          <select id="teaseMessage">
+            <option>Streak dekh ke dumbbells bhi sad ho gaye 😂</option>
+            <option>Gym membership hai ya decoration item? 😄</option>
+            <option>Bro ka streak rest day pe chala gaya 💀</option>
+            <option>Mirror selfie se body nahi banegi champion 😂</option>
+            <option>Protein shake ready hai, bas banda missing hai 💪</option>
+            <option>Gym bag bhi soch raha hoga: mujhe kab use karoge? 😭</option>
+            <option>Consistency ka naam suna hai kabhi? 😂</option>
+            <option>Aaj workout kar lo, warna streak aur ego dono down 📉</option>
+            <option>Bro ka motivation airplane mode pe hai kya? ✈️</option>
+            <option>Leaderboard tumhara wait nahi karega champion 🔥</option>
+            <option>Streak zero, excuses hero 😂</option>
+            <option>Gym wale bhi pooch rahe: bhai kidhar gayab ho? 😄</option>
+            <option>Sofa champion se gym warrior banne ka time aa gaya 💪</option>
+            <option>Bro, calories burn karo excuses nahi 🔥</option>
+            <option>Comeback nahi kiya toh tease wall permanent ho jayegi 😂</option>
+          </select>
+        </div>
+
+        <button id="sendTeaseBtn" onclick="sendTeaseToLowest(this)">Send Friendly Tease</button>
+      </div>
+
+    </div>
+
+    <h2 class="section-title">🏆 Top Streak Holders</h2>
+
+    <div class="grid grid-3" id="topStreakMembers">
+      <div class="card">Loading top streak members...</div>
+    </div>
+
+    <h2 class="section-title">💬 Tease Wall</h2>
+
+    <div class="card" id="teaseWall">
+      Loading teases...
+    </div>
+
+    <h2 class="section-title">Recent Activity</h2>
+
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Workout Type</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+
+        <tbody id="recentActivity">
+          <tr>
+            <td colspan="5">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+
+<script>
+if (protectPage()) {
+  showUserName();
+
+  let lowestMember = null;
+
+  const validDaysEl = document.getElementById("validDays");
+  const streakEl = document.getElementById("streak");
+  const pointsEl = document.getElementById("points");
+  const rankEl = document.getElementById("rank");
+  const recentActivityEl = document.getElementById("recentActivity");
+  const lowestStreakCardEl = document.getElementById("lowestStreakCard");
+  const topStreakMembersEl = document.getElementById("topStreakMembers");
+  const teaseWallEl = document.getElementById("teaseWall");
+  const teaseMessageEl = document.getElementById("teaseMessage");
+
+  function setButtonLoading(button, loading, normalText) {
+    if (!button) return;
+
+    if (!button.dataset.originalText) {
+      button.dataset.originalText = normalText || button.textContent;
+    }
+
+    button.disabled = loading;
+    button.textContent = loading ? "Processing..." : button.dataset.originalText;
+    button.style.opacity = loading ? "0.7" : "1";
+    button.style.pointerEvents = loading ? "none" : "auto";
+  }
+
+  function setButtonSuccess(button, message) {
+    if (!button) return;
+
+    button.textContent = message || "Success ✅";
+    button.style.opacity = "1";
+  }
+
+  function showLinkProcessing(link) {
+    if (!link) return;
+
+    link.textContent = "Processing...";
+    link.style.pointerEvents = "none";
+    link.style.opacity = "0.7";
+  }
+
+  async function loadDashboard() {
+    const user = getUser();
+
+    if (!user) {
+      window.location.replace("./index.html");
+      return;
+    }
+
+    const data = await apiRequest({
+      action: "getDashboard",
+      member_id: user.member_id
+    });
+
+    if (data.status === "success") {
+      if (validDaysEl) validDaysEl.textContent = data.valid_days || 0;
+      if (streakEl) streakEl.textContent = data.current_streak || 0;
+      if (pointsEl) pointsEl.textContent = data.total_points || 0;
+      if (rankEl) rankEl.textContent = data.rank || "--";
+
+      if (!recentActivityEl) return;
+
+      recentActivityEl.innerHTML = "";
+
+      if (!data.recent_tasks || data.recent_tasks.length === 0) {
+        recentActivityEl.innerHTML = `<tr><td colspan="5">No activity found</td></tr>`;
+        return;
+      }
+
+      data.recent_tasks.forEach(task => {
+        const statusClass = String(task.status || "pending").toLowerCase();
+
+        recentActivityEl.innerHTML += `
+          <tr>
+            <td>${formatDisplayDate(task.task_date)}</td>
+            <td>${task.workout_type || "-"}</td>
+            <td>${task.duration_minutes || 0} min</td>
+            <td><span class="badge ${statusClass}">${task.status || "Pending"}</span></td>
+            <td>${task.points || 0}</td>
+          </tr>
+        `;
+      });
+    } else {
+      alert(data.message || "Dashboard loading failed");
+    }
+  }
+
+  async function loadStreakFocus() {
+    const data = await apiRequest({
+      action: "getStreakFocus"
+    });
+
+    if (data.status === "success" && data.lowest_member) {
+      lowestMember = data.lowest_member;
+
+      if (lowestStreakCardEl) {
+        lowestStreakCardEl.innerHTML = `
+          <h3>🔥 Comeback Board</h3>
+          <p><b>${lowestMember.member_name}</b> has the lowest streak right now.</p>
+          <h2 style="font-size:42px;margin:12px 0;color:#ea580c;">
+            ${lowestMember.current_streak || 0} Days
+          </h2>
+          <p>Comeback time! Aaj ka workout miss nahi hona chahiye 💪</p>
+        `;
+      }
+    } else {
+      lowestMember = null;
+
+      if (lowestStreakCardEl) {
+        lowestStreakCardEl.innerHTML = `
+          <h3>No lowest member found</h3>
+          <p>Data will appear after members start submitting valid workouts.</p>
+        `;
+      }
+    }
+
+    renderTopStreakMembers(data.top_streak_members || []);
+  }
+
+  function renderTopStreakMembers(members) {
+    if (!topStreakMembersEl) return;
+
+    topStreakMembersEl.innerHTML = "";
+
+    if (!members.length) {
+      topStreakMembersEl.innerHTML = `<div class="card">No streak data available.</div>`;
+      return;
+    }
+
+    members.forEach((member, index) => {
+      topStreakMembersEl.innerHTML += `
+        <div class="card stat-card">
+          <h3>#${index + 1}</h3>
+          <p><b>${member.member_name}</b></p>
+          <p>🔥 ${member.current_streak || 0} Day Streak</p>
+          <p>${member.total_points || 0} Points</p>
+        </div>
+      `;
+    });
+  }
+
+  async function sendTeaseToLowest(button) {
+    const user = getUser();
+
+    if (!user) {
+      window.location.replace("./index.html");
+      return;
+    }
+
+    if (!lowestMember) {
+      alert("No lowest streak member found");
+      return;
+    }
+
+    if (!teaseMessageEl) {
+      alert("Tease message box not found");
+      return;
+    }
+
+    if (String(user.member_id) === String(lowestMember.member_id)) {
+      alert("You cannot tease yourself 😂");
+      return;
+    }
+
+    setButtonLoading(button, true, "Send Friendly Tease");
+
+    const data = await apiRequest({
+      action: "sendTease",
+      from_member_id: user.member_id,
+      from_member_name: user.name,
+      to_member_id: lowestMember.member_id,
+      to_member_name: lowestMember.member_name,
+      message: teaseMessageEl.value,
+      type: "Funny"
+    });
+
+    if (data.status === "success") {
+      setButtonSuccess(button, "Success ✅");
+      alert(data.message || "Success");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 700);
+    } else {
+      alert(data.message || "Something went wrong");
+      setButtonLoading(button, false, "Send Friendly Tease");
+    }
+  }
+
+  window.sendTeaseToLowest = sendTeaseToLowest;
+
+  async function loadTeaseWall() {
+    if (!teaseWallEl) return;
+
+    const data = await apiRequest({
+      action: "getTeaseWall"
+    });
+
+    if (!data.teases || data.teases.length === 0) {
+      teaseWallEl.innerHTML = "No teases yet.";
+      return;
+    }
+
+    teaseWallEl.innerHTML = "";
+
+    data.teases.forEach(t => {
+      teaseWallEl.innerHTML += `
+        <div class="tease-item">
+          <strong>${t.from_member_name}</strong> teased 
+          <strong>${t.to_member_name}</strong>
+          <p>${t.message}</p>
+          <span class="tease-time">${formatDisplayDate(t.created_at)}</span>
+        </div>
+      `;
+    });
+  }
+
+  function formatDisplayDate(dateValue) {
+    if (!dateValue) return "-";
+
+    const date = new Date(dateValue);
+
+    if (isNaN(date.getTime())) {
+      return dateValue;
+    }
+
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  }
+
+  loadDashboard();
+  loadStreakFocus();
+  loadTeaseWall();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rules | FitProof</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <button class="mobile-menu" onclick="document.querySelector('.sidebar').classList.toggle('show')">☰ Menu</button>
+
+  <aside class="sidebar">
+    <h2>FitProof</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="submit-task.html">Submit Daily Task</a>
+    <a href="verify-task.html">Verify Tasks</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="profile.html">Profile</a>
+    <a class="active" href="rules.html">Rules</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Challenge Rules</h1>
+        <p>Follow fair play rules to keep the tournament genuine.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Submission Rules</h3>
+        <br>
+        <p>1. One workout submission per day.</p>
+        <p>2. Task must be submitted with correct date.</p>
+        <p>3. Fake proof may lead to rejection.</p>
+        <p>4. Proof photo/link is recommended.</p>
+      </div>
+
+      <div class="card">
+        <h3>Verification Rules</h3>
+        <br>
+        <p>1. Own task cannot be verified.</p>
+        <p>2. Two different members must approve.</p>
+        <p>3. Same member cannot verify twice.</p>
+        <p>4. Two rejections can reject the task.</p>
+      </div>
+
+      <div class="card">
+        <h3>Point System</h3>
+        <br>
+        <p>Valid gym day: 10 points</p>
+        <p>30+ minutes workout: +5 points</p>
+        <p>60+ minutes workout: +10 points</p>
+        <p>Verification: +2 points</p>
+      </div>
+
+      <div class="card">
+        <h3>Badges</h3>
+        <br>
+        <p>7-Day Streak</p>
+        <p>15-Day Warrior</p>
+        <p>30-Day Beast</p>
+        <p>Monthly Champion</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+protectPage();
+</script>
+
+</body>
+</html>

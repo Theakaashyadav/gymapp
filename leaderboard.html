@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leaderboard | FitProof</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <button class="mobile-menu" onclick="document.querySelector('.sidebar').classList.toggle('show')">☰ Menu</button>
+
+  <aside class="sidebar">
+    <h2>FitProof</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="submit-task.html">Submit Daily Task</a>
+    <a href="verify-task.html">Verify Tasks</a>
+    <a class="active" href="leaderboard.html">Leaderboard</a>
+    <a href="profile.html">Profile</a>
+    <a href="rules.html">Rules</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Leaderboard</h1>
+        <p>Rank is based on valid gym days, streak and points.</p>
+      </div>
+    </div>
+
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Member</th>
+            <th>Valid Days</th>
+            <th>Streak</th>
+            <th>Points</th>
+            <th>Level</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <tr><td colspan="6">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+protectPage();
+
+async function loadLeaderboard() {
+  const data = await apiRequest({
+    action: "getLeaderboard"
+  });
+
+  leaderboardBody.innerHTML = "";
+
+  if (!data.leaderboard || data.leaderboard.length === 0) {
+    leaderboardBody.innerHTML = `<tr><td colspan="6">No leaderboard data</td></tr>`;
+    return;
+  }
+
+  data.leaderboard.forEach((row, index) => {
+    leaderboardBody.innerHTML += `
+      <tr>
+        <td>#${index + 1}</td>
+        <td>${row.member_name}</td>
+        <td>${row.total_valid_days}</td>
+        <td>${row.current_streak}</td>
+        <td>${row.total_points}</td>
+        <td>${row.level}</td>
+      </tr>
+    `;
+  });
+}
+
+loadLeaderboard();
+</script>
+
+</body>
+</html>
