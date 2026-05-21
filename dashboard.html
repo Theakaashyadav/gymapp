@@ -179,6 +179,17 @@ if (protectPage()) {
     link.style.opacity = "0.7";
   }
 
+  function openWhatsAppGroupMessage(message) {
+    const finalMessage =
+`😂 FitProof Friendly Tease
+
+
+${message}`;
+
+    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(finalMessage);
+    window.open(whatsappUrl, "_blank");
+  }
+
   async function loadDashboard() {
     const user = getUser();
 
@@ -302,6 +313,8 @@ if (protectPage()) {
       return;
     }
 
+    const teaseText = teaseMessageEl.value;
+
     setButtonLoading(button, true, "Send Friendly Tease");
 
     const data = await apiRequest({
@@ -310,17 +323,26 @@ if (protectPage()) {
       from_member_name: user.name,
       to_member_id: lowestMember.member_id,
       to_member_name: lowestMember.member_name,
-      message: teaseMessageEl.value,
+      message: teaseText,
+      whatsapp_group_name: "our expenditure",
       type: "Funny"
     });
 
     if (data.status === "success") {
-      setButtonSuccess(button, "Success ✅");
-      alert(data.message || "Success");
+      setButtonSuccess(button, "Saved ✅ Opening WhatsApp...");
+
+      const whatsappMessage =
+`${user.name} teased ${lowestMember.member_name} 😂
+
+"${teaseText}"
+
+🔥 ${lowestMember.member_name}, comeback time! Gym miss mat karo 💪`;
+
+      openWhatsAppGroupMessage(whatsappMessage);
 
       setTimeout(() => {
         window.location.reload();
-      }, 700);
+      }, 1200);
     } else {
       alert(data.message || "Something went wrong");
       setButtonLoading(button, false, "Send Friendly Tease");
