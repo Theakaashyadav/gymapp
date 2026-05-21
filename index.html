@@ -92,8 +92,15 @@ const regGoal = document.getElementById("regGoal");
 const regPin = document.getElementById("regPin");
 const registerBtn = document.getElementById("registerBtn");
 
+/* SAFE AUTO REDIRECT */
 const existingUser = getUser();
-if (existingUser) {
+
+if (
+  existingUser &&
+  existingUser.member_id &&
+  existingUser.name &&
+  !window.location.pathname.includes("dashboard.html")
+) {
   window.location.replace("dashboard.html");
 }
 
@@ -142,12 +149,16 @@ loginForm.addEventListener("submit", async function (e) {
 
     if (data.status === "success" && data.user && data.user.member_id) {
       saveUser(data.user);
-      window.location.href = "dashboard.html";
+
+      setTimeout(() => {
+        window.location.replace("dashboard.html");
+      }, 300);
+
     } else {
       alert(data.message || "Invalid login details");
-      console.error("LOGIN ERROR:", data);
       setButtonLoading(loginBtn, false, "Login");
     }
+
   } catch (err) {
     console.error("LOGIN FAILED:", err);
     alert("Login failed. Please try again.");
@@ -202,6 +213,7 @@ registerForm.addEventListener("submit", async function (e) {
     } else {
       alert(data.message || "Registration failed");
     }
+
   } catch (err) {
     console.error("REGISTER FAILED:", err);
     alert("Registration failed. Please try again.");
