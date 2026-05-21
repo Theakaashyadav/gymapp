@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitBit Splash</title>
 
   <style>
@@ -13,188 +13,306 @@
       font-family: "Poppins", Arial, sans-serif;
     }
 
-    body {
-      min-height: 100vh;
-      background: #020403;
+    html, body {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      background: #020403;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #fff;
     }
 
     .splash-screen {
-      min-height: 100vh;
       width: 100%;
+      height: 100vh;
+      height: 100dvh;
       position: relative;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 28px;
       background:
-        radial-gradient(circle at 45% 28%, rgba(183,255,33,.22), transparent 22%),
-        radial-gradient(circle at 35% 52%, rgba(183,255,33,.14), transparent 24%),
-        linear-gradient(135deg, #020403, #071008 45%, #000);
+        radial-gradient(circle at 50% 35%, rgba(183,255,33,0.18), transparent 28%),
+        radial-gradient(circle at 15% 20%, rgba(183,255,33,0.12), transparent 22%),
+        radial-gradient(circle at 85% 85%, rgba(183,255,33,0.10), transparent 25%),
+        linear-gradient(160deg, #020403, #061207 55%, #000);
     }
 
-    .splash-screen::before,
-    .splash-screen::after {
-      content: "";
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(183,255,33,0.18);
+      filter: blur(18px);
+      animation: moveOrb 6s ease-in-out infinite alternate;
+    }
+
+    .orb.one {
+      width: 160px;
+      height: 160px;
+      top: 12%;
+      left: -50px;
+    }
+
+    .orb.two {
+      width: 220px;
+      height: 220px;
+      right: -80px;
+      bottom: 12%;
+      animation-delay: 1.2s;
+    }
+
+    .grid-lines {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-    }
-
-    .splash-screen::before {
-      background:
-        repeating-linear-gradient(
-          115deg,
-          transparent 0 18px,
-          rgba(183,255,33,.08) 19px,
-          transparent 22px
-        );
-      opacity: .45;
-      transform: skewY(-10deg);
-    }
-
-    .splash-screen::after {
-      background:
-        radial-gradient(circle at top left, rgba(183,255,33,.2) 1px, transparent 2px),
-        radial-gradient(circle at bottom right, rgba(183,255,33,.22) 1px, transparent 2px);
-      background-size: 18px 18px;
-      mask-image:
-        radial-gradient(circle at top left, black, transparent 30%),
-        radial-gradient(circle at bottom right, black, transparent 32%);
-      opacity: .7;
+      background-image:
+        linear-gradient(rgba(183,255,33,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(183,255,33,0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
+      opacity: 0.5;
     }
 
     .splash-content {
-      width: 100%;
-      max-width: 520px;
-      min-height: 92vh;
       position: relative;
-      z-index: 2;
+      z-index: 5;
+      width: 100%;
+      max-width: 430px;
+      min-height: 100%;
+      padding: 34px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      animation: fadeIn .9s ease forwards;
-    }
-
-    .logo-wrap {
-      width: min(92vw, 560px);
-      margin-top: -60px;
-      position: relative;
-      filter: drop-shadow(0 0 22px rgba(183,255,33,.38));
-      animation: floatLogo 3s ease-in-out infinite;
-    }
-
-    .logo-wrap img {
-      width: 100%;
-      display: block;
-    }
-
-    .glow-line {
-      position: absolute;
-      width: 65%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #b7ff21, transparent);
-      left: -15%;
-      bottom: 28%;
-      box-shadow: 0 0 18px #b7ff21;
-      transform: rotate(-28deg);
-      animation: flash 2s ease-in-out infinite;
-    }
-
-    .loading-area {
-      width: min(75vw, 420px);
-      position: absolute;
-      bottom: 9vh;
       text-align: center;
     }
 
-    .loading-text {
+    .logo-card {
+      width: 245px;
+      height: 245px;
+      border-radius: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(183,255,33,0.25);
+      box-shadow:
+        0 0 40px rgba(183,255,33,0.25),
+        inset 0 0 35px rgba(183,255,33,0.08);
+      backdrop-filter: blur(12px);
+      position: relative;
+      animation: logoPop 1s ease forwards, floatLogo 3.2s ease-in-out infinite 1s;
+    }
+
+    .logo-card::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 44px;
+      background: conic-gradient(
+        from 180deg,
+        transparent,
+        rgba(183,255,33,0.9),
+        transparent,
+        rgba(183,255,33,0.45),
+        transparent
+      );
+      z-index: -1;
+      animation: rotateBorder 4s linear infinite;
+    }
+
+    .logo-card::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 39px;
+      background: #031006;
+      z-index: -1;
+    }
+
+    .logo-card img {
+      width: 86%;
+      height: 86%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 24px rgba(183,255,33,0.55));
+    }
+
+    .app-name {
+      margin-top: 34px;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(183,255,33,0.45);
+      animation: fadeUp 0.8s ease forwards 0.4s;
+      opacity: 0;
+    }
+
+    .tagline {
+      margin-top: 8px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.72);
+      letter-spacing: 1px;
+      animation: fadeUp 0.8s ease forwards 0.65s;
+      opacity: 0;
+    }
+
+    .loading-area {
+      position: absolute;
+      bottom: 58px;
+      left: 24px;
+      right: 24px;
+      animation: fadeUp 0.8s ease forwards 0.9s;
+      opacity: 0;
+    }
+
+    .loading-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
       color: #b7ff21;
-      font-size: 19px;
+      font-size: 12px;
       font-weight: 800;
-      letter-spacing: 10px;
-      margin-bottom: 28px;
-      text-shadow: 0 0 14px rgba(183,255,33,.9);
+      letter-spacing: 2px;
     }
 
     .progress-box {
       width: 100%;
-      height: 18px;
-      border-radius: 50px;
-      border: 2px solid #b7ff21;
-      padding: 3px;
-      box-shadow:
-        0 0 18px rgba(183,255,33,.55),
-        inset 0 0 12px rgba(183,255,33,.18);
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(183,255,33,0.35);
       overflow: hidden;
+      box-shadow: 0 0 18px rgba(183,255,33,0.18);
     }
 
     .progress-fill {
       width: 0%;
       height: 100%;
-      border-radius: 50px;
-      background: linear-gradient(90deg, #b7ff21, #73e600, #eaff8a);
-      box-shadow: 0 0 22px rgba(183,255,33,.95);
-      transition: width .18s linear;
-      position: relative;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #77e600, #b7ff21, #ecff8a);
+      box-shadow: 0 0 22px rgba(183,255,33,0.9);
+      transition: width 0.18s ease;
     }
 
-    .progress-fill::after {
-      content: "";
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      width: 20px;
-      height: 20px;
+    .dots {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dots span {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: #eaff8a;
-      transform: translateY(-50%);
-      box-shadow: 0 0 22px #b7ff21;
+      background: #b7ff21;
+      box-shadow: 0 0 12px #b7ff21;
+      animation: dotPulse 1s ease-in-out infinite;
     }
 
-    .percent {
-      color: #b7ff21;
-      margin-top: 14px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      font-size: 13px;
+    .dots span:nth-child(2) {
+      animation-delay: 0.15s;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(.96); }
-      to { opacity: 1; transform: scale(1); }
+    .dots span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes logoPop {
+      from {
+        opacity: 0;
+        transform: scale(0.72) rotate(-8deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+      }
     }
 
     @keyframes floatLogo {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-12px);
+      }
     }
 
-    @keyframes flash {
-      0%, 100% { opacity: .25; transform: rotate(-28deg) translateX(-40px); }
-      50% { opacity: 1; transform: rotate(-28deg) translateX(70px); }
+    @keyframes rotateBorder {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes moveOrb {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+      to {
+        transform: translate(35px, -25px) scale(1.15);
+      }
+    }
+
+    @keyframes dotPulse {
+      0%, 100% {
+        opacity: 0.25;
+        transform: scale(0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.25);
+      }
     }
 
     @media (max-width: 480px) {
-      .logo-wrap {
-        width: 115vw;
-        margin-top: -90px;
+      .logo-card {
+        width: 210px;
+        height: 210px;
+        border-radius: 36px;
+      }
+
+      .app-name {
+        font-size: 26px;
+      }
+
+      .tagline {
+        font-size: 13px;
       }
 
       .loading-area {
-        bottom: 8vh;
-        width: 78vw;
+        bottom: 42px;
+      }
+    }
+
+    @media (max-height: 620px) {
+      .logo-card {
+        width: 180px;
+        height: 180px;
       }
 
-      .loading-text {
-        font-size: 15px;
-        letter-spacing: 7px;
+      .app-name {
+        margin-top: 22px;
       }
 
-      .progress-box {
-        height: 16px;
+      .loading-area {
+        bottom: 28px;
       }
     }
   </style>
@@ -202,51 +320,62 @@
 
 <body>
 
-<section class="splash-screen">
-  <div class="splash-content">
+  <section class="splash-screen">
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="grid-lines"></div>
 
-    <div class="logo-wrap">
-      <div class="glow-line"></div>
+    <div class="splash-content">
 
-      <!-- Replace this image path with your splash/logo image -->
-      <img src="images/flash.png" alt="FitBit Logo">
-    </div>
-
-    <div class="loading-area">
-      <div class="loading-text">LOADING...</div>
-
-      <div class="progress-box">
-        <div class="progress-fill" id="progressFill"></div>
+      <div class="logo-card">
+        <img src="images/flash.png" alt="FitBit Logo">
       </div>
 
-      <div class="percent" id="percentText">0%</div>
+      <h1 class="app-name">FitBit</h1>
+      <p class="tagline">Track • Compete • Stay Fit</p>
+
+      <div class="loading-area">
+        <div class="loading-top">
+          <span>LOADING</span>
+          <span id="percentText">0%</span>
+        </div>
+
+        <div class="progress-box">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
     </div>
+  </section>
 
-  </div>
-</section>
+  <script>
+    const progressFill = document.getElementById("progressFill");
+    const percentText = document.getElementById("percentText");
 
-<script>
-  const progressFill = document.getElementById("progressFill");
-  const percentText = document.getElementById("percentText");
+    let progress = 0;
 
-  let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.floor(Math.random() * 5) + 2;
 
-  const loadingInterval = setInterval(() => {
-    progress += Math.floor(Math.random() * 4) + 1;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
 
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(loadingInterval);
+        setTimeout(() => {
+          window.location.href = "auth.html";
+        }, 450);
+      }
 
-      setTimeout(() => {
-        window.location.href = "auth.html";
-      }, 500);
-    }
-
-    progressFill.style.width = progress + "%";
-    percentText.textContent = progress + "%";
-  }, 90);
-</script>
+      progressFill.style.width = progress + "%";
+      percentText.textContent = progress + "%";
+    }, 90);
+  </script>
 
 </body>
 </html>
