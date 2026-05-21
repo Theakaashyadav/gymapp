@@ -1,5 +1,7 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzadnBHadrc1hdvy24eYN6NmCzClgDN-ybjdAvRM7CPFhp_sJPV8HE_VsXvZ_wP02pk0A/exec";
 
+const USER_KEY = "gymUser";
+
 console.log("✅ app.js loaded");
 
 function apiRequest(data) {
@@ -55,55 +57,63 @@ function apiRequest(data) {
 
 function saveUser(user) {
   if (!user || !user.member_id) {
-    console.error("Invalid user object:", user);
-    throw new Error("member_id missing");
+    console.error("❌ Invalid user object:", user);
+    return false;
   }
 
-  localStorage.setItem("gymUser", JSON.stringify(user));
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  return true;
 }
 
 function getUser() {
   try {
-    const rawUser = localStorage.getItem("gymUser");
+    const rawUser = localStorage.getItem(USER_KEY);
 
     if (!rawUser) return null;
 
     const user = JSON.parse(rawUser);
 
     if (!user || !user.member_id) {
-      localStorage.removeItem("gymUser");
+      localStorage.removeItem(USER_KEY);
       return null;
     }
 
     return user;
   } catch (err) {
     console.error("❌ getUser error:", err);
-    localStorage.removeItem("gymUser");
+    localStorage.removeItem(USER_KEY);
     return null;
   }
-}
-
-function logout() {
-  localStorage.removeItem("gymUser");
-  window.location.href = "index.html";
 }
 
 function protectPage() {
   const user = getUser();
 
   if (!user) {
-    window.location.replace("./index.html");
+    window.location.replace("index.html");
     return false;
   }
 
   return true;
 }
 
+function logout() {
+  localStorage.removeItem(USER_KEY);
+  window.location.replace("index.html");
+}
+
 function showUserName() {
   const user = getUser();
-  const nameElements = document.querySelectorAll("[data-user-name]");
 
-  nameElements.forEach((el) => {
+  document.querySelectorAll("[data-user-name]").forEach((el) => {
     el.textContent = user && user.name ? user.name : "Member";
   });
+}
+
+function showLinkProcessing(link) {
+  if (!link) return;
+
+  link.textContent = "Processing...";
+  link.style.pointerEvents = "none";
+  link.style.opacity = "0.7";
 }
