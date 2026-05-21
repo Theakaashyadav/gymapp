@@ -136,8 +136,14 @@ loginForm.addEventListener("submit", async function (e) {
     console.log("LOGIN RESPONSE:", data);
 
     if (data.status === "success" && data.user && data.user.member_id) {
-      saveUser(data.user);
-      window.location.replace("dashboard.html");
+      const saved = saveUser(data.user);
+
+      if (saved) {
+        window.location.replace("dashboard.html");
+      } else {
+        alert("Login saved failed. Please try again.");
+        setButtonLoading(loginBtn, false, "Login");
+      }
     } else {
       alert(data.message || "Invalid login details");
       setButtonLoading(loginBtn, false, "Login");
