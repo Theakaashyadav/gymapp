@@ -95,8 +95,7 @@
       height: 78px;
       margin: 0 auto 14px;
       border-radius: 24px;
-      background:
-        linear-gradient(145deg, #101820, #05080b);
+      background: linear-gradient(145deg, #101820, #05080b);
       border: 1px solid rgba(183,255,33,.35);
       display: flex;
       align-items: center;
@@ -165,6 +164,34 @@
       background: rgba(255,255,255,.09);
     }
 
+    .pin-boxes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .pin-boxes input {
+      height: 58px;
+      padding: 0;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0;
+      border-radius: 18px;
+      color: var(--green);
+      caret-color: var(--green);
+    }
+
+    .pin-boxes input::placeholder {
+      color: rgba(255,255,255,.22);
+    }
+
+    .pin-boxes input.filled {
+      border-color: rgba(183,255,33,.55);
+      background: rgba(183,255,33,.09);
+      box-shadow: 0 0 0 4px rgba(183,255,33,.08);
+    }
+
     button {
       height: 54px;
       border: 0;
@@ -186,6 +213,15 @@
     button:disabled {
       cursor: not-allowed;
       transform: none;
+    }
+
+    .login-status {
+      display: none;
+      text-align: center;
+      margin-top: 8px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 800;
     }
 
     .toggle-text {
@@ -214,6 +250,15 @@
       .logo h1 {
         font-size: 30px;
       }
+
+      .pin-boxes {
+        gap: 10px;
+      }
+
+      .pin-boxes input {
+        height: 54px;
+        font-size: 22px;
+      }
     }
   </style>
 </head>
@@ -235,10 +280,18 @@
 
     <div class="form-group">
       <label>PIN</label>
-      <input type="password" id="loginPin" maxlength="4" required>
+
+      <div class="pin-boxes" data-target="loginPin">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+      </div>
+
+      <input type="hidden" id="loginPin" required>
     </div>
 
-    <button type="submit" id="loginBtn" style="width:100%">Login</button>
+    <p class="login-status" id="loginStatus">Checking PIN...</p>
 
     <div class="toggle-text">
       New member? <span onclick="toggleAuth()">Create Account</span>
@@ -258,7 +311,7 @@
 
     <div class="form-group">
       <label>Mobile</label>
-      <input type="text" id="regMobile" maxlength="10" required>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="regMobile" maxlength="10" required>
     </div>
 
     <div class="form-group">
@@ -274,7 +327,15 @@
 
     <div class="form-group">
       <label>Create 4 Digit PIN</label>
-      <input type="password" id="regPin" maxlength="4" required>
+
+      <div class="pin-boxes" data-target="regPin">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="•">
+      </div>
+
+      <input type="hidden" id="regPin" required>
     </div>
 
     <button type="submit" id="registerBtn" style="width:100%">Register</button>
@@ -297,7 +358,7 @@ const registerForm = document.getElementById("registerForm");
 
 const loginId = document.getElementById("loginId");
 const loginPin = document.getElementById("loginPin");
-const loginBtn = document.getElementById("loginBtn");
+const loginStatus = document.getElementById("loginStatus");
 
 const regName = document.getElementById("regName");
 const regEmail = document.getElementById("regEmail");
@@ -306,10 +367,104 @@ const regGoal = document.getElementById("regGoal");
 const regPin = document.getElementById("regPin");
 const registerBtn = document.getElementById("registerBtn");
 
+let isLoggingIn = false;
+
 const savedLoginId = localStorage.getItem(LOGIN_ID_KEY);
 if (savedLoginId) {
   loginId.value = savedLoginId;
 }
+
+function setupPinBoxes() {
+  document.querySelectorAll(".pin-boxes").forEach((group) => {
+    const targetId = group.dataset.target;
+    const hiddenInput = document.getElementById(targetId);
+    const boxes = Array.from(group.querySelectorAll("input"));
+
+    function updatePinValue() {
+      hiddenInput.value = boxes.map(box => box.value).join("");
+
+      boxes.forEach(box => {
+        box.classList.toggle("filled", box.value !== "");
+      });
+
+      if (targetId === "loginPin" && hiddenInput.value.length === 4) {
+        autoLogin();
+      }
+    }
+
+    boxes.forEach((box, index) => {
+      box.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "").slice(0, 1);
+
+        if (this.value && index < boxes.length - 1) {
+          boxes[index + 1].focus();
+        }
+
+        updatePinValue();
+      });
+
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Backspace" && !this.value && index > 0) {
+          boxes[index - 1].focus();
+        }
+
+        if (e.key === "ArrowLeft" && index > 0) {
+          boxes[index - 1].focus();
+        }
+
+        if (e.key === "ArrowRight" && index < boxes.length - 1) {
+          boxes[index + 1].focus();
+        }
+      });
+
+      box.addEventListener("paste", function (e) {
+        e.preventDefault();
+
+        const pasted = (e.clipboardData || window.clipboardData)
+          .getData("text")
+          .replace(/\D/g, "")
+          .slice(0, 4);
+
+        pasted.split("").forEach((digit, i) => {
+          if (boxes[i]) {
+            boxes[i].value = digit;
+          }
+        });
+
+        updatePinValue();
+
+        const nextIndex = Math.min(pasted.length, boxes.length - 1);
+        boxes[nextIndex].focus();
+      });
+    });
+  });
+}
+
+function clearPinBoxes(targetId) {
+  const group = document.querySelector(`.pin-boxes[data-target="${targetId}"]`);
+  const hiddenInput = document.getElementById(targetId);
+
+  if (!group || !hiddenInput) return;
+
+  group.querySelectorAll("input").forEach(input => {
+    input.value = "";
+    input.classList.remove("filled");
+    input.disabled = false;
+  });
+
+  hiddenInput.value = "";
+}
+
+function disablePinBoxes(targetId, disabled) {
+  const group = document.querySelector(`.pin-boxes[data-target="${targetId}"]`);
+  if (!group) return;
+
+  group.querySelectorAll("input").forEach(input => {
+    input.disabled = disabled;
+  });
+}
+
+setupPinBoxes();
 
 function toggleAuth() {
   const isLogin = loginForm.style.display !== "none";
@@ -319,6 +474,12 @@ function toggleAuth() {
 
   loginForm.reset();
   registerForm.reset();
+
+  clearPinBoxes("loginPin");
+  clearPinBoxes("regPin");
+
+  isLoggingIn = false;
+  loginStatus.style.display = "none";
 
   const savedLoginId = localStorage.getItem(LOGIN_ID_KEY);
   if (savedLoginId) {
@@ -332,14 +493,15 @@ function setButtonLoading(button, loading, text) {
   button.style.opacity = loading ? "0.7" : "1";
 }
 
-loginForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
+async function autoLogin() {
+  if (isLoggingIn) return;
 
   const loginValue = loginId.value.trim().toLowerCase();
   const pinValue = loginPin.value.trim();
 
   if (!loginValue || !pinValue) {
     alert("Please enter email/mobile and PIN");
+    clearPinBoxes("loginPin");
     return;
   }
 
@@ -347,10 +509,14 @@ loginForm.addEventListener("submit", async function (e) {
 
   if (!/^\d{4}$/.test(pinValue)) {
     alert("PIN must be exactly 4 digits");
+    clearPinBoxes("loginPin");
     return;
   }
 
-  setButtonLoading(loginBtn, true, "Login");
+  isLoggingIn = true;
+  loginStatus.textContent = "Checking PIN...";
+  loginStatus.style.display = "block";
+  disablePinBoxes("loginPin", true);
 
   try {
     const data = await apiRequest({
@@ -363,20 +529,35 @@ loginForm.addEventListener("submit", async function (e) {
       const saved = saveUser(data.user);
 
       if (saved) {
+        loginStatus.textContent = "Login successful...";
         window.location.replace("dashboard.html");
       } else {
         alert("Login saved failed. Please try again.");
-        setButtonLoading(loginBtn, false, "Login");
+        resetAutoLogin();
       }
     } else {
       alert(data.message || "Invalid login details");
-      setButtonLoading(loginBtn, false, "Login");
+      resetAutoLogin();
     }
 
   } catch (err) {
     alert("Login failed. Please try again.");
-    setButtonLoading(loginBtn, false, "Login");
+    resetAutoLogin();
   }
+}
+
+function resetAutoLogin() {
+  isLoggingIn = false;
+  loginStatus.style.display = "none";
+  clearPinBoxes("loginPin");
+  disablePinBoxes("loginPin", false);
+
+  const firstPinBox = document.querySelector('.pin-boxes[data-target="loginPin"] input');
+  if (firstPinBox) firstPinBox.focus();
+}
+
+loginForm.addEventListener("submit", function (e) {
+  e.preventDefault();
 });
 
 registerForm.addEventListener("submit", async function (e) {
@@ -420,6 +601,8 @@ registerForm.addEventListener("submit", async function (e) {
       localStorage.setItem(LOGIN_ID_KEY, emailValue);
 
       registerForm.reset();
+      clearPinBoxes("regPin");
+
       registerForm.style.display = "none";
       loginForm.style.display = "block";
       loginId.value = emailValue;
