@@ -99,7 +99,7 @@ function protectPage() {
 
 function logout() {
   localStorage.removeItem(USER_KEY);
-  window.location.replace("index.html");
+  window.location.replace("auth.html");
 }
 
 function showUserName() {
