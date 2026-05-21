@@ -92,18 +92,6 @@ const regGoal = document.getElementById("regGoal");
 const regPin = document.getElementById("regPin");
 const registerBtn = document.getElementById("registerBtn");
 
-/* SAFE AUTO REDIRECT */
-const existingUser = getUser();
-
-if (
-  existingUser &&
-  existingUser.member_id &&
-  existingUser.name &&
-  !window.location.pathname.includes("dashboard.html")
-) {
-  window.location.replace("dashboard.html");
-}
-
 function toggleAuth() {
   const isLogin = loginForm.style.display !== "none";
 
@@ -149,11 +137,7 @@ loginForm.addEventListener("submit", async function (e) {
 
     if (data.status === "success" && data.user && data.user.member_id) {
       saveUser(data.user);
-
-      setTimeout(() => {
-        window.location.replace("dashboard.html");
-      }, 300);
-
+      window.location.replace("dashboard.html");
     } else {
       alert(data.message || "Invalid login details");
       setButtonLoading(loginBtn, false, "Login");
