@@ -2,17 +2,229 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>FitProof Challenge | Auth</title>
+  <title>FitBit | Auth</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    :root {
+      --dark: #060b0f;
+      --card: rgba(13, 20, 26, 0.88);
+      --card-2: rgba(255, 255, 255, 0.06);
+      --green: #b7ff21;
+      --green-2: #73e600;
+      --white: #ffffff;
+      --muted: #9aa4ad;
+      --border: rgba(183, 255, 33, 0.22);
+      --shadow: rgba(183, 255, 33, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body.auth-page {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Poppins", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(183,255,33,.28), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(115,230,0,.18), transparent 32%),
+        linear-gradient(135deg, #030607, #071018 45%, #0b1117);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 430px;
+      padding: 34px 28px;
+      border-radius: 30px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.55),
+        0 0 45px rgba(183,255,33,.12);
+      backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-box::before {
+      content: "";
+      position: absolute;
+      width: 190px;
+      height: 190px;
+      background: rgba(183,255,33,.18);
+      border-radius: 50%;
+      top: -80px;
+      right: -80px;
+      filter: blur(35px);
+    }
+
+    .auth-box::after {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      background: rgba(115,230,0,.12);
+      border-radius: 50%;
+      bottom: -70px;
+      left: -70px;
+      filter: blur(35px);
+    }
+
+    .logo,
+    form {
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .app-mark {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto 14px;
+      border-radius: 24px;
+      background:
+        linear-gradient(145deg, #101820, #05080b);
+      border: 1px solid rgba(183,255,33,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      font-size: 34px;
+      font-weight: 900;
+      box-shadow: 0 15px 35px rgba(183,255,33,.2);
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -1px;
+      color: var(--white);
+    }
+
+    .logo h1 span {
+      color: var(--green);
+    }
+
+    .logo p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #d9e2e8;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: var(--card-2);
+      color: var(--white);
+      padding: 0 16px;
+      outline: none;
+      font-size: 15px;
+      transition: .25s ease;
+    }
+
+    .form-group select option {
+      background: #0b1117;
+      color: #fff;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(183,255,33,.12);
+      background: rgba(255,255,255,.09);
+    }
+
+    button {
+      height: 54px;
+      border: 0;
+      border-radius: 17px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 900;
+      color: #071018;
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      box-shadow: 0 16px 35px var(--shadow);
+      transition: .25s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 45px rgba(183,255,33,.34);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .toggle-text {
+      text-align: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .toggle-text span {
+      color: var(--green);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .toggle-text span:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .auth-box {
+        padding: 28px 20px;
+        border-radius: 24px;
+      }
+
+      .logo h1 {
+        font-size: 30px;
+      }
+    }
+  </style>
 </head>
 
 <body class="auth-page">
 
 <div class="auth-box">
   <div class="logo">
-    <h1>FitProof Challenge</h1>
-    <p>Submit. Verify. Compete.</p>
+    <div class="app-mark">FB</div>
+    <h1>Fit<span>Bit</span></h1>
+    <p>Train • Track • Transform</p>
   </div>
 
   <form id="loginForm">
@@ -78,6 +290,8 @@
 <script>
 console.log("✅ Auth page script loaded");
 
+const LOGIN_ID_KEY = "fitbit_last_login_id";
+
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
 
@@ -92,6 +306,11 @@ const regGoal = document.getElementById("regGoal");
 const regPin = document.getElementById("regPin");
 const registerBtn = document.getElementById("registerBtn");
 
+const savedLoginId = localStorage.getItem(LOGIN_ID_KEY);
+if (savedLoginId) {
+  loginId.value = savedLoginId;
+}
+
 function toggleAuth() {
   const isLogin = loginForm.style.display !== "none";
 
@@ -100,6 +319,11 @@ function toggleAuth() {
 
   loginForm.reset();
   registerForm.reset();
+
+  const savedLoginId = localStorage.getItem(LOGIN_ID_KEY);
+  if (savedLoginId) {
+    loginId.value = savedLoginId;
+  }
 }
 
 function setButtonLoading(button, loading, text) {
@@ -119,6 +343,8 @@ loginForm.addEventListener("submit", async function (e) {
     return;
   }
 
+  localStorage.setItem(LOGIN_ID_KEY, loginValue);
+
   if (!/^\d{4}$/.test(pinValue)) {
     alert("PIN must be exactly 4 digits");
     return;
@@ -132,8 +358,6 @@ loginForm.addEventListener("submit", async function (e) {
       login_id: loginValue,
       pin: pinValue
     });
-
-    console.log("LOGIN RESPONSE:", data);
 
     if (data.status === "success" && data.user && data.user.member_id) {
       const saved = saveUser(data.user);
@@ -150,7 +374,6 @@ loginForm.addEventListener("submit", async function (e) {
     }
 
   } catch (err) {
-    console.error("LOGIN FAILED:", err);
     alert("Login failed. Please try again.");
     setButtonLoading(loginBtn, false, "Login");
   }
@@ -191,10 +414,10 @@ registerForm.addEventListener("submit", async function (e) {
       pin: pinValue
     });
 
-    console.log("REGISTER RESPONSE:", data);
-
     if (data.status === "success") {
       alert("Registration successful. Please login.");
+
+      localStorage.setItem(LOGIN_ID_KEY, emailValue);
 
       registerForm.reset();
       registerForm.style.display = "none";
@@ -205,7 +428,6 @@ registerForm.addEventListener("submit", async function (e) {
     }
 
   } catch (err) {
-    console.error("REGISTER FAILED:", err);
     alert("Registration failed. Please try again.");
   }
 
